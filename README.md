@@ -1,5 +1,36 @@
 # Day 11 — Controlled Agent Security (2026)
 
+## Bài nộp
+
+| | |
+|---|---|
+| **Họ tên** | Hoàng Trung Hiếu |
+| **MSSV** | 2A202602945 |
+| **Repo** | `K4-L3-DAY11-HoangTrungHieu-2A202602945-Guardrails-HITL-Responsible-AI` |
+
+**Cách chạy** (từ gốc repo, Python 3.12, sau khi điền `.env`):
+
+```powershell
+python -m venv .venv
+.\.venv\Scripts\Activate.ps1
+pip install -r requirements.txt
+$env:PYTHONIOENCODING = "utf-8"   # Windows console hiển thị tiếng Việt
+python src/main.py --part 2        # CP2 guardrails
+python src/main.py --part 3        # CP3 → outputs/results.json, audit_log.json, metrics.json
+python src/main.py --part 4        # CP4 → outputs/attack_results.json (+ unsafe/guards)
+python scripts/grade.py --submission-dir . --out outputs/grade_report.json
+```
+
+**Lưu ý model Blue:** route trả phí `liquid/lfm-2.5-2.6b` trên OpenRouter hiện trả 404
+(*No endpoints found*), nên bài chạy bản `:free` của **cùng model** qua
+`OPENROUTER_BLUE_MODEL=liquid/lfm-2.5-2.6b:free` trong `.env` (xem `.env.example`).
+Hằng số `BLUE_MODEL` không đổi; biến này chỉ chấp nhận biến thể của đúng model đó.
+
+**Kết quả** (`outputs/lab_report.md`): safe bị chặn 0/8 · attack bị chặn 14/14 ·
+rate limit chặn 5/15 · Red leak 2/5 · Red Advance leak 0/5 · schema hợp lệ · public tests pass.
+
+---
+
 > 👤 **Hình thức:** bài tập **cá nhân** (1 người / 1 MSSV).  
 > 🎯 **Mục tiêu:** xây **Blue** (phòng thủ), rồi red-team **Red** + **Red Advance**.  
 > ✅ Làm theo **Checkpoint 1 → 5** trong [`CHECKPOINTS.md`](CHECKPOINTS.md) · nộp theo [`SUBMISSION.md`](SUBMISSION.md).
