@@ -1,39 +1,31 @@
 {
-  "generated_at": "2026-09-26T09:30:52.860156+00:00",
-  "total_requests": 59,
-  "blocked_requests": 30,
-  "block_rate": 0.5084745762711864,
+  "generated_at": "2026-09-26T07:42:20.655966+00:00",
+  "total_requests": 47,
+  "blocked_requests": 27,
+  "block_rate": 0.574468085106383,
   "rate_limit_hits": 6,
-  "judge_checks": 1,
-  "judge_fails": 1,
-  "judge_fail_rate": 1.0,
-  "judge_errors": 1,
-  "judge_error_rate": 1.0,
-  "judge_blocks": 1,
-  "canary_triggers": 1,
-  "session_risk_blocks": 1,
-  "high_risk_sessions": 16,
-  "injection_blocks": 18,
+  "judge_checks": 0,
+  "judge_fails": 0,
+  "judge_fail_rate": 0.0,
+  "injection_blocks": 17,
   "topic_blocks": 3,
   "output_leak_blocks": 0,
   "output_redactions": 1,
   "abuse_lockouts": 1,
-  "llm_errors": 2,
-  "egress_checks": 13,
-  "egress_denied": 11,
+  "llm_errors": 0,
+  "egress_checks": 12,
+  "egress_denied": 10,
   "blocks_by_layer": {
-    "input_guardrail": 22,
-    "rate_limiter": 6,
-    "output_guardrail": 1,
-    "session_risk": 1
+    "input_guardrail": 21,
+    "rate_limiter": 6
   },
   "alerts": [
     {
       "metric": "block_rate",
-      "value": 0.508,
+      "value": 0.574,
       "threshold": 0.5,
       "severity": "warning",
-      "message": "Block rate 51% > 50%: possible attack campaign or over-blocking of real customers."
+      "message": "Block rate 57% > 50%: possible attack campaign or over-blocking of real customers."
     },
     {
       "metric": "rate_limit_hits",
@@ -41,34 +33,6 @@
       "threshold": 5,
       "severity": "warning",
       "message": "6 rate-limit hits: flooding / cost-abuse attempt."
-    },
-    {
-      "metric": "judge_fail_rate",
-      "value": 1.0,
-      "threshold": 0.3,
-      "severity": "warning",
-      "message": "LLM judge failing 100% of responses."
-    },
-    {
-      "metric": "judge_error_rate",
-      "value": 1.0,
-      "threshold": 0.2,
-      "severity": "warning",
-      "message": "LLM judge unavailable on 100% of calls — it fails closed, so risky sessions are being refused; check the judge endpoint/quota."
-    },
-    {
-      "metric": "canary_triggers",
-      "value": 1,
-      "threshold": 1,
-      "severity": "critical",
-      "message": "1 canary token hit(s): the system prompt was exfiltrated or replayed. Rotate the canary and the secrets it guards; review the audit log."
-    },
-    {
-      "metric": "session_risk_blocks",
-      "value": 1,
-      "threshold": 1,
-      "severity": "warning",
-      "message": "1 request(s) held for human review: cumulative session risk crossed the block threshold (multi-turn probing)."
     },
     {
       "metric": "abuse_lockouts",
@@ -79,10 +43,10 @@
     },
     {
       "metric": "egress_denied",
-      "value": 11,
+      "value": 10,
       "threshold": 1,
       "severity": "critical",
-      "message": "11 outbound request(s) denied by the egress allowlist."
+      "message": "10 outbound request(s) denied by the egress allowlist."
     }
   ]
 }

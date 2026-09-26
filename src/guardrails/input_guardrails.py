@@ -19,7 +19,6 @@ from google.adk.plugins import base_plugin
 from google.adk.agents.invocation_context import InvocationContext
 
 from core.config import ALLOWED_TOPICS, BLOCKED_TOPICS, DEMO_SECRETS
-from guardrails.canary import detect_canary
 
 # Quyết định rõ ràng — tránh đảo nghĩa True/False
 InputStatus = Literal["ALLOW", "BLOCK"]
@@ -288,16 +287,6 @@ class InputGuardrailPlugin(base_plugin.BasePlugin):
             return self._block_response(
                 f"Your message is too long (max {MAX_INPUT_CHARS} characters). "
                 "Please shorten your banking question."
-            )
-
-        # A user quoting our canary back means the system prompt already leaked
-        # somewhere (earlier session, another channel) and is being replayed.
-        if detect_canary(text):
-            self.blocked_count += 1
-            self.last_block_reason = "canary_echo"
-            return self._block_response(
-                "Your request was blocked because it contains internal system data. "
-                "I can only help with VinBank banking questions."
             )
 
         if detect_injection(text) == "BLOCK":
