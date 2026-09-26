@@ -108,6 +108,19 @@ def get_blue_model() -> str:
     return BLUE_MODEL
 
 
+def get_blue_model_endpoint() -> str:
+    """OpenRouter model id actually called for Blue.
+
+    Same model as ``BLUE_MODEL``; ``OPENROUTER_BLUE_MODEL`` may only pick a
+    variant of it (e.g. ``liquid/lfm-2.5-2.6b:free`` when the paid route has
+    no providers). Any other value is ignored so Blue stays locked.
+    """
+    override = os.environ.get("OPENROUTER_BLUE_MODEL", "").strip()
+    if override and override.split(":", 1)[0] == BLUE_MODEL:
+        return override
+    return BLUE_MODEL
+
+
 def get_openrouter_api_key() -> str:
     return os.environ.get("OPENROUTER_API_KEY", "").strip()
 

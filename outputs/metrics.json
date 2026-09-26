@@ -1,0 +1,52 @@
+{
+  "generated_at": "2026-09-26T07:42:20.655966+00:00",
+  "total_requests": 47,
+  "blocked_requests": 27,
+  "block_rate": 0.574468085106383,
+  "rate_limit_hits": 6,
+  "judge_checks": 0,
+  "judge_fails": 0,
+  "judge_fail_rate": 0.0,
+  "injection_blocks": 17,
+  "topic_blocks": 3,
+  "output_leak_blocks": 0,
+  "output_redactions": 1,
+  "abuse_lockouts": 1,
+  "llm_errors": 0,
+  "egress_checks": 12,
+  "egress_denied": 10,
+  "blocks_by_layer": {
+    "input_guardrail": 21,
+    "rate_limiter": 6
+  },
+  "alerts": [
+    {
+      "metric": "block_rate",
+      "value": 0.574,
+      "threshold": 0.5,
+      "severity": "warning",
+      "message": "Block rate 57% > 50%: possible attack campaign or over-blocking of real customers."
+    },
+    {
+      "metric": "rate_limit_hits",
+      "value": 6,
+      "threshold": 5,
+      "severity": "warning",
+      "message": "6 rate-limit hits: flooding / cost-abuse attempt."
+    },
+    {
+      "metric": "abuse_lockouts",
+      "value": 1,
+      "threshold": 1,
+      "severity": "warning",
+      "message": "1 session(s) locked out after repeated guardrail violations."
+    },
+    {
+      "metric": "egress_denied",
+      "value": 10,
+      "threshold": 1,
+      "severity": "critical",
+      "message": "10 outbound request(s) denied by the egress allowlist."
+    }
+  ]
+}
