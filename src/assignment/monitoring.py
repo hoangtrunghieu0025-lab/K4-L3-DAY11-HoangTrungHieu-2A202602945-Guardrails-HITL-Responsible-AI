@@ -1,8 +1,8 @@
 """
 Assignment 11 — Monitoring & Alerts.
 
-Tracks block rate, rate-limit hits, judge fail rate.
-Fires alerts when thresholds are exceeded.
+Tracks block rate, rate-limit hits, judge fail/error rate, canary trips and
+session-risk escalations. Fires alerts when thresholds are exceeded.
 """
 from __future__ import annotations
 
@@ -38,6 +38,10 @@ class MonitoringAlert:
     # always page someone, even though the output guard caught it.
     output_leak_threshold: int = 1
     lockout_threshold: int = 1
+    # Canary = the system prompt left the building. Zero tolerance.
+    canary_threshold: int = 1
+    judge_error_rate_threshold: float = 0.2
+    session_risk_block_threshold: int = 1
     alerts: list[Alert] = field(default_factory=list)
 
     # Counters — update these from your pipeline after each request
@@ -46,6 +50,11 @@ class MonitoringAlert:
     rate_limit_hits: int = 0
     judge_checks: int = 0
     judge_fails: int = 0
+    judge_errors: int = 0
+    judge_blocks: int = 0
+    canary_triggers: int = 0
+    session_risk_blocks: int = 0
+    high_risk_sessions: int = 0
     injection_blocks: int = 0
     topic_blocks: int = 0
     output_leak_blocks: int = 0
@@ -83,13 +92,30 @@ class MonitoringAlert:
             self.injection_blocks += 1
         elif reason == "off_topic":
             self.topic_blocks += 1
+        elif reason in ("canary_leak", "canary_echo"):
+            self.canary_triggers += 1
+            if reason == "canary_leak":
+                self.output_leak_blocks += 1
+        elif reason in ("judge_unsafe", "judge_error"):
+            self.judge_blocks += 1
+        elif reason == "session_risk":
+            self.session_risk_blocks += 1
         elif layer == "output_guardrail":
             self.output_leak_blocks += 1
 
-    def record_judge(self, *, safe: bool) -> None:
+    def record_judge(self, *, safe: bool, error: bool = False) -> None:
         self.judge_checks += 1
         if not safe:
             self.judge_fails += 1
+        if error:
+            self.judge_errors += 1
+
+    def record_canary(self) -> None:
+        """Canary seen outside a normal request path (e.g. egress payload)."""
+        self.canary_triggers += 1
+
+    def record_high_risk_sessions(self, count: int) -> None:
+        self.high_risk_sessions = count
 
     def record_egress(self, *, allowed: bool) -> None:
         self.egress_checks += 1
@@ -125,6 +151,27 @@ class MonitoringAlert:
             self._raise(
                 "judge_fail_rate", round(snap["judge_fail_rate"], 3), self.judge_fail_rate_threshold,
                 f"LLM judge failing {snap['judge_fail_rate']:.0%} of responses.",
+                "warning",
+            )
+        if self.judge_checks and snap["judge_error_rate"] > self.judge_error_rate_threshold:
+            self._raise(
+                "judge_error_rate", round(snap["judge_error_rate"], 3), self.judge_error_rate_threshold,
+                f"LLM judge unavailable on {snap['judge_error_rate']:.0%} of calls — it fails closed, "
+                "so risky sessions are being refused; check the judge endpoint/quota.",
+                "warning",
+            )
+        if self.canary_triggers >= self.canary_threshold:
+            self._raise(
+                "canary_triggers", self.canary_triggers, self.canary_threshold,
+                f"{self.canary_triggers} canary token hit(s): the system prompt was exfiltrated or "
+                "replayed. Rotate the canary and the secrets it guards; review the audit log.",
+                "critical",
+            )
+        if self.session_risk_blocks >= self.session_risk_block_threshold:
+            self._raise(
+                "session_risk_blocks", self.session_risk_blocks, self.session_risk_block_threshold,
+                f"{self.session_risk_blocks} request(s) held for human review: cumulative "
+                "session risk crossed the block threshold (multi-turn probing).",
                 "warning",
             )
         if self.output_leak_blocks >= self.output_leak_threshold:
@@ -166,6 +213,9 @@ class MonitoringAlert:
         judge_fail_rate = (
             self.judge_fails / self.judge_checks if self.judge_checks else 0.0
         )
+        judge_error_rate = (
+            self.judge_errors / self.judge_checks if self.judge_checks else 0.0
+        )
         return {
             "total_requests": self.total_requests,
             "blocked_requests": self.blocked_requests,
@@ -174,6 +224,12 @@ class MonitoringAlert:
             "judge_checks": self.judge_checks,
             "judge_fails": self.judge_fails,
             "judge_fail_rate": judge_fail_rate,
+            "judge_errors": self.judge_errors,
+            "judge_error_rate": judge_error_rate,
+            "judge_blocks": self.judge_blocks,
+            "canary_triggers": self.canary_triggers,
+            "session_risk_blocks": self.session_risk_blocks,
+            "high_risk_sessions": self.high_risk_sessions,
             "injection_blocks": self.injection_blocks,
             "topic_blocks": self.topic_blocks,
             "output_leak_blocks": self.output_leak_blocks,
