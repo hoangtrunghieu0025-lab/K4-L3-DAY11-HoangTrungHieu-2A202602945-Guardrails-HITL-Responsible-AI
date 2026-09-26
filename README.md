@@ -27,7 +27,7 @@ python scripts/grade.py --submission-dir . --out outputs/grade_report.json
 Hằng số `BLUE_MODEL` không đổi; biến này chỉ chấp nhận biến thể của đúng model đó.
 
 **Kết quả** (`outputs/lab_report.md`): safe bị chặn 0/8 · attack bị chặn 14/14 ·
-rate limit chặn 5/15 · Red leak 2/5 · Red Advance leak 0/5 · schema hợp lệ · public tests pass.
+rate limit chặn 5/15 · Red leak 3/9 · Red Advance leak 0/9 · schema hợp lệ · public tests pass.
 
 ---
 
